@@ -1,9 +1,12 @@
+from datetime import datetime
 from classes import Record, AddressBook
 from sorter import sorter
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import FuzzyWordCompleter
 from prompt_toolkit.styles import Style
 from prettytable import PrettyTable
+from datetime import datetime
+
 
 def input_error(func):
     def wrapper(*args):
@@ -51,12 +54,12 @@ def handle_add(name, phone):
                         return f"Contact {name} added with phone number {phone}, email {data[0]}"
                     elif data[0].count(".") == 2:
                         handle_set_birthday(name, data[0])
-                        return f"Contact {name} added with phone number {phone}, birthday {data[0]}"
-                
+                        return f"Contact {name} added with phone number {phone},  {data[0]}"
+
                 print("Invalid input.")
             elif answer != "n":
                 print("Invalid input.")
-            
+
             return f"Contact {name} added with phone number {phone}"
         except ValueError:
             return "Invalid phone"
@@ -126,12 +129,28 @@ def handle_set_birthday(name, day):
 
 
 @input_error
-def days_to_birthday(name):
-    record = ADDRESS_BOOK.find(name)
-    if record is not None:
-        return record.days_to_birthday()
-    else:
-        raise KeyError
+def days_to_birthday(date):
+    records = ADDRESS_BOOK.data
+    date_now = datetime.now().date()
+
+    try:
+        target_date = datetime.strptime(date, "%d.%m.%Y").date()
+    except ValueError:
+        print("date not correct, input please write DD.MM.YYYY")
+
+    users_within_range = []
+
+    for key, value in records.items():
+        try:
+            user_birthday = datetime.strptime(
+                str(value.birthday), "%d.%m.%Y").replace(year=date_now.year).date()
+
+            if date_now <= user_birthday <= target_date:
+                users_within_range.append((key, value))
+        except ValueError:
+            continue
+
+    return users_within_range
 
 
 @input_error
@@ -237,7 +256,8 @@ def show_help():
         sort: Сортує необхідну папку.
         """
 
-    commands = [line.strip() for line in help_message.split('\n') if line.strip()]
+    commands = [line.strip()
+                for line in help_message.split('\n') if line.strip()]
     tabele = PrettyTable(['Доступні команди', 'Опис'])
     tabele.align['Доступні команди'] = 'l'
     tabele.align['Опис'] = 'l'
@@ -245,7 +265,8 @@ def show_help():
     for command in commands:
         command_parts = command.split(':', 1)
         if len(command_parts) == 2:
-            tabele.add_row([command_parts[0].strip(), command_parts[1].strip()])
+            tabele.add_row([command_parts[0].strip(),
+                           command_parts[1].strip()])
 
     return tabele
 
