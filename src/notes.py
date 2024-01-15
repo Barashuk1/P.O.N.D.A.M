@@ -5,11 +5,11 @@ import re
 
 class Note:
 
-    def __init__(self, *data, date=None):
-        self.author = data[0]
-        self.title = data[1]
-        self.note = data[2]
-        self.tags = data[3] if len(data) > 3 else None
+    def __init__(self, author, title, note, tags=None, date=None):
+        self.author = author
+        self.title = title
+        self.note = note
+        self.tags = None
         self.date = datetime.now().strftime("%d.%m.%Y,%H:%M")
 
     def change_note(self, field, new_data):
@@ -35,7 +35,7 @@ class Note:
 
     def __str__(self):
         tags_str = f"tags: {self.tags}; " if self.tags else ""
-        return f"author: {self.author}; title: {self.title}; note: {self.note}; {tags_str}date: {self.date}."
+        return f"author: {self.author}; title: {self.title}; note: {self.note}; tags: {tags_str}; date: {self.date}."
 
 
 class NoteManager:
@@ -59,8 +59,12 @@ class NoteManager:
 
     def add_tag(self, note, tag):
         if note in self.notes:
-            note.tags += ", " + tag
-            print("Tag added successfully.")
+            if note.tags == None:
+                note.tags = tag
+                print("Tag added successfully.")
+            else:
+                note.tags += ", " + tag
+                print("Tag added successfully.")
         else:
             print("Note not found in the list.")
 
